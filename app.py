@@ -17,21 +17,52 @@ def get_db_connection() -> sqlite3.Connection:
     return conn
 
 
-def init_db() -> None:
+def ensure_schema() -> None:
     with get_db_connection() as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS subscribers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                email TEXT NOT NULL UNIQUE,
-                phone TEXT,
-                preferred_channel TEXT NOT NULL DEFAULT 'email',
-                product_interest TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        existing = conn.execute(
+            "SELECT name FROM PRAGMA_TABLE_INFO('subscribers')"
+        ).fetchall()
+        cols = {row[0] for row in existing}
+
+        if not cols:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS subscribers (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    email TEXT NOT NULL UNIQUE,
+                    phone TEXT,
+                    preferred_channel TEXT NOT NULL DEFAULT 'email',
+                    product_interest TEXT,
+                    desired_set TEXT,
+                    max_msrp TEXT,
+                    alert_type TEXT DEFAULT 'all',
+                    product_category TEXT,
+                    retailer TEXT,
+                    custom_search TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
             )
-            """
-        )
+            conn.commit()
+            return
+
+        additions = {
+            "desired_set": "ALTER TABLE subscribers ADD COLUMN desired_set TEXT",
+            "max_msrp": "ALTER TABLE subscribers ADD COLUMN max_msrp TEXT",
+            "alert_type": "ALTER TABLE subscribers ADD COLUMN alert_type TEXT DEFAULT 'all'",
+            "product_category": "ALTER TABLE subscribers ADD COLUMN product_category TEXT",
+            "retailer": "ALTER TABLE subscribers ADD COLUMN retailer TEXT",
+            "custom_search": "ALTER TABLE subscribers ADD COLUMN custom_search TEXT",
+        }
+
+        for column_name, statement in additions.items():
+            if column_name not in cols:
+                try:
+                    conn.execute(statement)
+                except sqlite3.Error:
+                    pass
+
         conn.commit()
 
 
@@ -47,6 +78,12 @@ def subscribe():
     phone = (request.form.get("phone") or "").strip()
     preferred_channel = (request.form.get("preferred_channel") or "email").strip().lower()
     product_interest = (request.form.get("product_interest") or "").strip()
+    desired_set = (request.form.get("desired_set") or "").strip()
+    max_msrp = (request.form.get("max_msrp") or "").strip()
+    alert_type = (request.form.get("alert_type") or "all").strip().lower()
+    product_category = (request.form.get("product_category") or "").strip()
+    retailer = (request.form.get("retailer") or "").strip()
+    custom_search = (request.form.get("custom_search") or "").strip()
 
     if not email or "@" not in email:
         flash("Please enter a valid email address.")
@@ -55,6 +92,9 @@ def subscribe():
     if preferred_channel not in {"email", "sms", "both"}:
         preferred_channel = "email"
 
+    if alert_type not in {"all", "msrp", "set", "specific", "restock", "release"}:
+        alert_type = "all"
+
     if phone:
         phone = phone.replace(" ", "")
 
@@ -62,15 +102,36 @@ def subscribe():
         with get_db_connection() as conn:
             conn.execute(
                 """
-                INSERT INTO subscribers (name, email, phone, preferred_channel, product_interest)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO subscribers (
+                    name, email, phone, preferred_channel, product_interest,
+                    desired_set, max_msrp, alert_type, product_category, retailer, custom_search
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(email) DO UPDATE SET
                     name = excluded.name,
                     phone = excluded.phone,
                     preferred_channel = excluded.preferred_channel,
-                    product_interest = excluded.product_interest
+                    product_interest = excluded.product_interest,
+                    desired_set = excluded.desired_set,
+                    max_msrp = excluded.max_msrp,
+                    alert_type = excluded.alert_type,
+                    product_category = excluded.product_category,
+                    retailer = excluded.retailer,
+                    custom_search = excluded.custom_search
                 """,
-                (name, email, phone, preferred_channel, product_interest),
+                (
+                    name,
+                    email,
+                    phone,
+                    preferred_channel,
+                    product_interest,
+                    desired_set,
+                    max_msrp,
+                    alert_type,
+                    product_category,
+                    retailer,
+                    custom_search,
+                ),
             )
             conn.commit()
     except sqlite3.Error:
@@ -96,7 +157,9 @@ def admin():
     with get_db_connection() as conn:
         subscribers = conn.execute(
             """
-            SELECT id, name, email, phone, preferred_channel, product_interest, created_at
+            SELECT id, name, email, phone, preferred_channel, product_interest,
+                   desired_set, max_msrp, alert_type, product_category, retailer, custom_search,
+                   created_at
             FROM subscribers
             ORDER BY created_at DESC
             """
@@ -111,5 +174,5 @@ def health():
 
 
 if __name__ == "__main__":
-    init_db()
+    ensure_schema()
     app.run(host="0.0.0.0", port=5000, debug=True)

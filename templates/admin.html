@@ -14,7 +14,12 @@
           <th>Email</th>
           <th>Phone</th>
           <th>Channel</th>
-          <th>Interest</th>
+          <th>Alert type</th>
+          <th>Set</th>
+          <th>MSRP</th>
+          <th>Category</th>
+          <th>Retailer</th>
+          <th>Custom search</th>
           <th>Joined</th>
         </tr>
       </thead>
@@ -25,7 +30,12 @@
             <td>{{ s.email }}</td>
             <td>{{ s.phone or '—' }}</td>
             <td>{{ s.preferred_channel }}</td>
-            <td>{{ s.product_interest or '—' }}</td>
+            <td>{{ s.alert_type or 'all' }}</td>
+            <td>{{ s.desired_set or '—' }}</td>
+            <td>{{ s.max_msrp or '—' }}</td>
+            <td>{{ s.product_category or '—' }}</td>
+            <td>{{ s.retailer or '—' }}</td>
+            <td>{{ s.custom_search or '—' }}</td>
             <td>{{ s.created_at }}</td>
           </tr>
         {% endfor %}

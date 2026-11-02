@@ -45,9 +45,49 @@
             </select>
           </label>
 
+          <div class="grid-two">
+            <label>
+              Alert type
+              <select name="alert_type">
+                <option value="all">All drops</option>
+                <option value="release">Release alerts</option>
+                <option value="restock">Restock alerts</option>
+                <option value="set">Set-specific</option>
+                <option value="msrp">MSRP target</option>
+                <option value="specific">Specific card</option>
+              </select>
+            </label>
+            <label>
+              Product category
+              <input type="text" name="product_category" placeholder="Booster box, singles, binder, sealed" />
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Desired set
+              <input type="text" name="desired_set" placeholder="Scarlet & Violet 151, Champions Path, etc." />
+            </label>
+            <label>
+              Max MSRP
+              <input type="text" name="max_msrp" placeholder="$25, $50, $100" />
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Retailer preference
+              <input type="text" name="retailer" placeholder="Pokemon Center, Target, local shop" />
+            </label>
+            <label>
+              Product interest / specific card
+              <input type="text" name="product_interest" placeholder="Example: booster box, Charizard, set name" />
+            </label>
+          </div>
+
           <label>
-            Product interest
-            <input type="text" name="product_interest" placeholder="Example: Scarlet & Violet, Pokémon Center, booster boxes" />
+            Custom search term
+            <input type="text" name="custom_search" placeholder="Any specific product, set, or keyword you want watched" />
           </label>
 
           <button type="submit">Get alerts</button>
@@ -59,10 +99,10 @@
       <div class="panel-inner">
         <h3>What you’ll get</h3>
         <ul class="list">
-          <li>Early release alerts before product goes live</li>
-          <li>Restock notifications when supply appears</li>
-          <li>Priority updates for hot Pokémon box drops</li>
-          <li>Simple email/SMS action for card collectors</li>
+          <li>Alerts for exactly the set, card, or category you want</li>
+          <li>Price-based notifications for MSRP and near-MSRP drops</li>
+          <li>Restock and release reminders for your chosen brands and categories</li>
+          <li>Simple email/SMS updates when product availability changes</li>
         </ul>
       </div>
     </aside>
