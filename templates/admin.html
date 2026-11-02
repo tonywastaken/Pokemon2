@@ -1,49 +1,42 @@
 {% extends 'base.html' %}
-{% block title %}Subscriber Dashboard{% endblock %}
+{% block title %}Pokemon Card Watch Admin{% endblock %}
 
 {% block content %}
 <div class="hero">
-  <h1>Subscriber dashboard</h1>
-  <p>Review who signed up for release and restock notifications.</p>
-  <p><a href="{{ url_for('admin_export', token=request.args.get('token')) }}">Download CSV</a></p>
+  <h1>Admin dashboard</h1>
+  <p>Review subscribers and tracked products.</p>
+  <p><a href="{{ url_for('admin_export', token=request.args.get('token')) }}">Download subscriber CSV</a></p>
 
-  {% if subscribers %}
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Channel</th>
-          <th>Alert</th>
-          <th>Set</th>
-          <th>MSRP</th>
-          <th>Category</th>
-          <th>Retailer</th>
-          <th>Custom search</th>
-          <th>Updated</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in subscribers %}
-          <tr>
-            <td>{{ s.name or '—' }}</td>
-            <td>{{ s.email }}</td>
-            <td>{{ s.phone or '—' }}</td>
-            <td>{{ s.preferred_channel }}</td>
-            <td>{{ s.alert_type or 'all' }}</td>
-            <td>{{ s.desired_set or '—' }}</td>
-            <td>{{ s.max_msrp or '—' }}</td>
-            <td>{{ s.product_category or '—' }}</td>
-            <td>{{ s.retailer or '—' }}</td>
-            <td>{{ s.custom_search or '—' }}</td>
-            <td>{{ s.updated_at or s.created_at }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No subscribers yet.</p>
+  {% if watchlist %}
+    <div class="panel" style="margin-top:18px;">
+      <div class="panel-inner">
+        <h2>Tracked products</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Retailer</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Last checked</th>
+              <th>Auto-buy</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in watchlist %}
+              <tr>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.retailer or '—' }}</td>
+                <td>{{ item.store_location or '—' }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ item.last_checked or '—' }}</td>
+                <td>{{ 'On' if item.auto_buy else 'Off' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   {% endif %}
 </div>
 {% endblock %}

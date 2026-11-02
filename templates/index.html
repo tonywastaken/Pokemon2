@@ -1,26 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Pokemon Card Alerts{% endblock %}
+{% block title %}Pokemon Card Watch{% endblock %}
 
 {% block content %}
 <div class="hero">
-  <span class="badge">Release & restock alerts</span>
-  <h1>Get notified before the Pokémon card drop hits.</h1>
-  <p>Track launches, restocks, and high-demand card releases. Join the list and get updates by email or SMS.</p>
-
-  <div class="features">
-    <div class="feature">
-      <h3>Set-based alerts</h3>
-      <p>Only track the products you actually want, like one set, one box, or one product family.</p>
-    </div>
-    <div class="feature">
-      <h3>Price target alerts</h3>
-      <p>Set your max MSRP or card price, and get notified when it drops into your range.</p>
-    </div>
-    <div class="feature">
-      <h3>Custom criteria</h3>
-      <p>Watch a retailer, category, or keyword and ignore everything else.</p>
-    </div>
-  </div>
+  <span class="badge">Stock + release watcher</span>
+  <h1>Watch Pokémon cards before and right when they drop.</h1>
+  <p>Simple tracking for online listings and store pickups. Add a product, run a check, and see if it’s live or about to go live.</p>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -30,97 +15,126 @@
     {% endif %}
   {% endwith %}
 
-  <div class="layout" style="margin-top: 28px;">
+  <div class="layout">
     <section class="panel">
       <div class="panel-inner">
-        <h2>Join the alert list</h2>
-        <form action="{{ url_for('subscribe') }}" method="post">
+        <h2>Add a product to monitor</h2>
+        <form action="{{ url_for('add_watch') }}" method="post">
           <div class="grid-two">
             <label>
-              Name
-              <input type="text" name="name" placeholder="Your name" />
+              Product name
+              <input type="text" name="product_name" placeholder="Scarlet & Violet 151 Booster Box" required>
             </label>
             <label>
-              Email
-              <input type="email" name="email" placeholder="you@example.com" required />
+              Retailer
+              <input type="text" name="retailer" placeholder="Target, Pokemon Center, local shop">
             </label>
           </div>
 
-          <label>
-            Phone number
-            <input type="tel" name="phone" placeholder="+1 (555) 123-4567" />
-          </label>
+          <div class="grid-two">
+            <label>
+              Product URL
+              <input type="url" name="product_url" placeholder="https://...">
+            </label>
+            <label>
+              Store location
+              <input type="text" name="store_location" placeholder="City / store name / pickup location">
+            </label>
+          </div>
 
-          <label>
-            Preferred notification
-            <select name="preferred_channel">
-              <option value="email">Email only</option>
-              <option value="sms">SMS only</option>
-              <option value="both">Email + SMS</option>
-            </select>
-          </label>
+          <div class="grid-two">
+            <label>
+              Target price
+              <input type="text" name="target_price" placeholder="$50 max MSRP">
+            </label>
+            <label>
+              Expected release
+              <input type="text" name="expected_release" placeholder="2026-11-10T18:00:00Z">
+            </label>
+          </div>
 
           <div class="grid-two">
             <label>
               Alert type
               <select name="alert_type">
-                <option value="all">All drops</option>
-                <option value="release">Release alerts</option>
-                <option value="restock">Restock alerts</option>
-                <option value="set">Set-specific</option>
-                <option value="msrp">MSRP target</option>
-                <option value="specific">Specific card</option>
+                <option value="all">All</option>
+                <option value="release">Release</option>
+                <option value="restock">Restock</option>
+                <option value="set">Set</option>
+                <option value="msrp">MSRP</option>
               </select>
             </label>
             <label>
-              Product category
-              <input type="text" name="product_category" placeholder="Booster box, singles, binder, sealed" />
-            </label>
-          </div>
-
-          <div class="grid-two">
-            <label>
-              Desired set
-              <input type="text" name="desired_set" placeholder="Scarlet & Violet 151, Champions Path, etc." />
-            </label>
-            <label>
-              Max MSRP
-              <input type="text" name="max_msrp" placeholder="$25, $50, $100" />
-            </label>
-          </div>
-
-          <div class="grid-two">
-            <label>
-              Retailer preference
-              <input type="text" name="retailer" placeholder="Pokemon Center, Target, local shop" />
-            </label>
-            <label>
-              Product interest / specific card
-              <input type="text" name="product_interest" placeholder="Example: booster box, Charizard, set name" />
+              Product type
+              <input type="text" name="product_type" placeholder="Booster box, singles, sealed, binder">
             </label>
           </div>
 
           <label>
-            Custom search term
-            <input type="text" name="custom_search" placeholder="Any specific product, set, or keyword you want watched" />
+            Notes
+            <input type="text" name="notes" placeholder="Watch this before release, then again right when it drops">
           </label>
 
-          <button type="submit">Get alerts</button>
+          <label>
+            <input type="checkbox" name="auto_buy" value="on">
+            Enable guarded auto-buy trigger (safe demo mode only)
+          </label>
+
+          <button type="submit">Add to watch list</button>
         </form>
       </div>
     </section>
 
     <aside class="panel">
       <div class="panel-inner">
-        <h3>What you’ll get</h3>
+        <h3>How it works</h3>
         <ul class="list">
-          <li>Alerts for exactly the set, card, or category you want</li>
-          <li>Price-based notifications for MSRP and near-MSRP drops</li>
-          <li>Restock and release reminders for your chosen brands and categories</li>
-          <li>Simple email/SMS updates when product availability changes</li>
+          <li>Checks online product pages before the release window</li>
+          <li>Flags likely stock activity as soon as the item goes live</li>
+          <li>Tracks store/pickup situations separately from online listings</li>
+          <li>Uses a safe trigger for auto-buy only when configured properly</li>
         </ul>
       </div>
     </aside>
   </div>
+
+  {% if items %}
+    <div class="panel" style="margin-top:28px;">
+      <div class="panel-inner">
+        <h2>Watch list</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Retailer</th>
+              <th>Status</th>
+              <th>Release</th>
+              <th>Store</th>
+              <th>Auto-buy</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.retailer or '—' }}</td>
+                <td>{{ item.status or 'unknown' }}</td>
+                <td>{{ item.expected_release or '—' }}</td>
+                <td>{{ item.store_location or '—' }}</td>
+                <td>{{ 'On' if item.auto_buy else 'Off' }}</td>
+                <td>
+                  <form action="{{ url_for('run_watch') }}" method="post">
+                    <input type="hidden" name="watch_id" value="{{ item.id }}">
+                    <button type="submit">Check now</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

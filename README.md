@@ -1,73 +1,43 @@
 # Pokemon2
 
-This repo includes a Pokémon card stock checker and a Flask-based waiting list for release/restock alerts.
+This repo is a simple Pokémon card monitoring and buying-helper site.
 
 GitHub repo: https://github.com/tonywastaken/Pokemon2
 
-## Local setup
+## Features
+
+- simple storefront / product watch page
+- product entry for online and in-store tracking
+- release-window monitoring for upcoming drops
+- stock status detection for online listings
+- safe auto-buy toggle that is intentionally blocked unless the retailer has an approved checkout flow
+- subscriber signup for alerts
+- admin dashboard + CSV export
+
+## Run locally
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-```
-
-## Run the alert site
-
-```bash
 python app.py
 ```
 
 Then open:
 
 - http://localhost:5000
-
-## Admin dashboard
-
-Use the admin view to review subscribers:
-
 - http://localhost:5000/admin
 
-Optionally protect it with an environment variable:
+## What this is designed to do
 
-```bash
-export ADMIN_TOKEN=supersecret
-```
+This is intentionally simple and practical:
 
-Then open:
+- watch a product before a release happens
+- check for stock when it goes live
+- watch for in-store availability for local shop pickups
+- flag likely restocks and early release windows
+- enable a guarded auto-buy trigger only when the retailer allows it
 
-- http://localhost:5000/admin?token=supersecret
+## Important note
 
-CSV export:
-
-- http://localhost:5000/admin/export?token=supersecret
-
-## Run the stock checker
-
-```bash
-python main.py --demo
-```
-
-## What users can customize
-
-The signup form supports:
-
-- product interest, set name, or specific search term
-- price target / max MSRP
-- alert type: all, release, restock, set-based, MSRP, or specific card
-- preferred retailer or product category
-- email + SMS preferences
-
-This makes it useful for collectors who only care about specific sets, price ceilings, or product categories rather than every Pokémon release.
-
-## Data storage
-
-- local SQLite DB: `subscribers.db`
-- admin view shows all tracked preferences
-- `/api/subscribers` exposes the same data in JSON for easy integration
-
-## Production notes
-
-- the stock checker polls retailer pages for stock/restock signals and release windows
-- auto-buy logic is intentionally disabled by default and should only be enabled with retailer-approved automation
-- the app is ready to be extended with Twilio, SendGrid, or a hosted database later
+The auto-buy function is not a real checkout bot by default. It only simulates a trigger and is meant to be replaced with retailer-approved automation logic.
