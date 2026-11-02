@@ -1,40 +1,159 @@
 {% extends 'base.html' %}
-{% block title %}Pokemon Card Watch Admin{% endblock %}
+{% block title %}Pokemon Card Watch{% endblock %}
 
 {% block content %}
 <div class="hero">
-  <h1>Admin dashboard</h1>
-  <p>Review subscribers and tracked products.</p>
-  <p><a href="{{ url_for('admin_export', token=request.args.get('token')) }}">Download subscriber CSV</a></p>
+  <span class="badge">Stock + release watcher</span>
+  <h1>Watch Pokémon cards before and right when they drop.</h1>
+  <p>Simple tracking for online listings and store pickups. Add a product, run a check, and see if it’s live or about to go live.</p>
 
-  {% if watchlist %}
-    <div class="panel" style="margin-top:18px;">
+  <div class="features">
+    <div class="feature">
+      <h3>Live stock</h3>
+      <p>See when an item is in stock or just before it goes live.</p>
+    </div>
+    <div class="feature">
+      <h3>Release watch</h3>
+      <p>Track the window right before a drop so you can act early.</p>
+    </div>
+    <div class="feature">
+      <h3>Store + online</h3>
+      <p>Monitor both retailer pages and local pickup opportunities.</p>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="layout" style="margin-top:28px;">
+    <section class="panel">
       <div class="panel-inner">
-        <h2>Tracked products</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Retailer</th>
-              <th>Location</th>
-              <th>Status</th>
-              <th>Last checked</th>
-              <th>Auto-buy</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in watchlist %}
-              <tr>
-                <td>{{ item.product_name }}</td>
-                <td>{{ item.retailer or '—' }}</td>
-                <td>{{ item.store_location or '—' }}</td>
-                <td>{{ item.status }}</td>
-                <td>{{ item.last_checked or '—' }}</td>
-                <td>{{ 'On' if item.auto_buy else 'Off' }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <h2>Add a product to monitor</h2>
+        <form action="{{ url_for('add_watch') }}" method="post">
+          <div class="grid-two">
+            <label>
+              Product name
+              <input type="text" name="product_name" placeholder="Scarlet & Violet 151 Booster Box" required>
+            </label>
+            <label>
+              Retailer
+              <input type="text" name="retailer" placeholder="Target, Pokemon Center, local shop">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Product URL
+              <input type="url" name="product_url" placeholder="https://...">
+            </label>
+            <label>
+              Store location
+              <input type="text" name="store_location" placeholder="City / store name / pickup location">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Target price
+              <input type="text" name="target_price" placeholder="$50 max MSRP">
+            </label>
+            <label>
+              Expected release
+              <input type="text" name="expected_release" placeholder="2026-11-10T18:00:00Z">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Alert type
+              <select name="alert_type">
+                <option value="all">All</option>
+                <option value="release">Release</option>
+                <option value="restock">Restock</option>
+                <option value="set">Set</option>
+                <option value="msrp">MSRP</option>
+              </select>
+            </label>
+            <label>
+              Product type
+              <input type="text" name="product_type" placeholder="Booster box, singles, sealed, binder">
+            </label>
+          </div>
+
+          <label>
+            Notes
+            <input type="text" name="notes" placeholder="Watch this before release, then again right when it drops">
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="auto_buy" value="on">
+            <span>Enable guarded auto-buy trigger (safe demo mode only)</span>
+          </label>
+
+          <button type="submit">Add to watch list</button>
+        </form>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-inner">
+        <h3>How it works</h3>
+        <ul class="list">
+          <li>Checks online product pages before the release window</li>
+          <li>Flags likely stock activity as soon as the item goes live</li>
+          <li>Tracks store/pickup situations separately from online listings</li>
+          <li>Uses a safe trigger for auto-buy only when configured properly</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  {% if items %}
+    <div class="panel" style="margin-top:28px;">
+      <div class="panel-inner">
+        <h2>Watch list</h2>
+
+        <div class="watch-grid">
+          {% for item in items %}
+            {% set status = (item.status or 'unknown') | lower %}
+            {% set status_class = 'status-live' if status in ['in_stock', 'page_loaded'] else 'status-release' if status in ['release_window', 'preorder'] else 'status-out' if status in ['out_of_stock'] else 'status-unknown' %}
+            {% set dot_class = 'live' if status in ['in_stock', 'page_loaded'] else 'warn' if status in ['release_window', 'preorder'] else 'out' if status in ['out_of_stock'] else '' %}
+
+            <article class="product-card">
+              <div class="card-header">
+                <h3>{{ item.product_name }}</h3>
+                <span class="status-pill {{ status_class }}">{{ item.status or 'unknown' }}</span>
+              </div>
+
+              <div class="stock-indicator">
+                <span class="dot {{ dot_class }}"></span>
+                <span>{{ 'Live stock' if status in ['in_stock', 'page_loaded'] else 'Watching' if status in ['release_window', 'preorder'] else 'Offline / waiting' if status == 'offline' else 'Not live yet' }}</span>
+              </div>
+
+              <div class="meta-box">
+                <div class="meta-row"><span>Retailer</span><strong>{{ item.retailer or '—' }}</strong></div>
+                <div class="meta-row"><span>Store</span><strong>{{ item.store_location or '—' }}</strong></div>
+                <div class="meta-row"><span>Release</span><strong>{{ item.expected_release or '—' }}</strong></div>
+                <div class="meta-row"><span>Auto-buy</span><strong>{{ 'On' if item.auto_buy else 'Off' }}</strong></div>
+              </div>
+
+              <div class="small-note">{{ item.notes or 'No notes added yet.' }}</div>
+
+              <div class="product-actions">
+                <span class="small-note">{{ item.product_type or 'General watch' }}</span>
+                <form action="{{ url_for('run_watch') }}" method="post">
+                  <input type="hidden" name="watch_id" value="{{ item.id }}">
+                  <button type="submit">Check now</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
       </div>
     </div>
   {% endif %}
