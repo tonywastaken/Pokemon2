@@ -1,0 +1,116 @@
+from __future__ import annotations
+
+import os
+import sqlite3
+from pathlib import Path
+
+from flask import Flask, flash, redirect, render_template, request, url_for
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
+
+DB_PATH = Path(__file__).with_name("subscribers.db")
+
+
+def get_db_connection() -> sqlite3.Connection:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db() -> None:
+    with get_db_connection() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS subscribers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                email TEXT NOT NULL UNIQUE,
+                phone TEXT,
+                preferred_channel TEXT NOT NULL DEFAULT 'email',
+                product_interest TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.commit()
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.post("/subscribe")
+def subscribe():
+    name = (request.form.get("name") or "").strip()
+    email = (request.form.get("email") or "").strip().lower()
+    phone = (request.form.get("phone") or "").strip()
+    preferred_channel = (request.form.get("preferred_channel") or "email").strip().lower()
+    product_interest = (request.form.get("product_interest") or "").strip()
+
+    if not email or "@" not in email:
+        flash("Please enter a valid email address.")
+        return redirect(url_for("index"))
+
+    if preferred_channel not in {"email", "sms", "both"}:
+        preferred_channel = "email"
+
+    if phone:
+        phone = phone.replace(" ", "")
+
+    try:
+        with get_db_connection() as conn:
+            conn.execute(
+                """
+                INSERT INTO subscribers (name, email, phone, preferred_channel, product_interest)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(email) DO UPDATE SET
+                    name = excluded.name,
+                    phone = excluded.phone,
+                    preferred_channel = excluded.preferred_channel,
+                    product_interest = excluded.product_interest
+                """,
+                (name, email, phone, preferred_channel, product_interest),
+            )
+            conn.commit()
+    except sqlite3.Error:
+        flash("There was a problem saving your signup. Please try again.")
+        return redirect(url_for("index"))
+
+    return redirect(url_for("thank_you"))
+
+
+@app.route("/thank-you")
+def thank_you():
+    return render_template("thank_you.html")
+
+
+@app.route("/admin")
+def admin():
+    admin_token = os.environ.get("ADMIN_TOKEN")
+    provided_token = request.args.get("token")
+
+    if admin_token and provided_token != admin_token:
+        return "Unauthorized", 401
+
+    with get_db_connection() as conn:
+        subscribers = conn.execute(
+            """
+            SELECT id, name, email, phone, preferred_channel, product_interest, created_at
+            FROM subscribers
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+
+    return render_template("admin.html", subscribers=subscribers)
+
+
+@app.get("/health")
+def health():
+    return {"ok": True}
+
+
+if __name__ == "__main__":
+    init_db()
+    app.run(host="0.0.0.0", port=5000, debug=True)

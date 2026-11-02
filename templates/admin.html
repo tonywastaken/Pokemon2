@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}You're on the list{% endblock %}
+
+{% block content %}
+<div class="thanks">
+  <div class="panel success-box">
+    <span class="badge">Success</span>
+    <h1>You’re signed up.</h1>
+    <p>
+      Thanks for joining the Pokémon card alert list. We’ll send updates when a release window or restock appears.
+    </p>
+    <p><a href="{{ url_for('index') }}">Back to the sign-up page</a></p>
+  </div>
+</div>
+{% endblock %}

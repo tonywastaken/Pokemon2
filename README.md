@@ -1,33 +1,44 @@
 # Pokemon2
 
-A simple Pokémon card stock checker and release monitor.
+This repo now includes two parts:
 
-## What it does
+1. A Python stock-checker for Pokémon card retailers
+2. A simple web app where people can sign up for release and restock alerts by email and phone
 
-- Watches retailer product pages for stock changes
-- Detects likely restocks and pre-order status
-- Identifies when a product is in its release window
-- Can optionally trigger a guarded auto-buy path when the retailer supports it
-
-## Quick start
+## Run the web app
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+python app.py
+```
+
+Then open:
+
+- http://localhost:5000
+
+## Run the stock checker
+
+```bash
 python main.py --demo
 ```
 
-## Configure products
+## Configure the web signup
 
-Edit `products.json` with real retailer URLs and release times.
+The app stores signups in a local SQLite database named `subscribers.db`. It accepts:
 
-## Example run
+- email address
+- phone number
+- preferred notification method (`email`, `sms`, or `both`)
+- product interest
 
-```bash
-python main.py --products products.json --interval 60
-```
+This is a good MVP for collecting signup intent before wiring in a real notification provider.
 
-## Important
+## Optional production upgrades
 
-Auto-buy is disabled by default. Only enable it for retailer APIs or checkout flows you explicitly control and have permission to automate.
+- email delivery via SendGrid / Postmark / SMTP
+- SMS delivery via Twilio
+- admin dashboard for viewing signups
+- product watchlist synced with subscriber interest
+- scheduled alerts when stock changes or a release window opens

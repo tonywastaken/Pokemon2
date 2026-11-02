@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Pokemon Card Alerts{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <span class="badge">Release & restock alerts</span>
+  <h1>Get notified before the Pokémon card drop hits.</h1>
+  <p>
+    Track product launches, restocks, and high-traffic card releases. Join the list and get updates by email or SMS.
+  </p>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-inner">
+        <h2>Join the alert list</h2>
+        <form action="{{ url_for('subscribe') }}" method="post">
+          <div class="grid-two">
+            <label>
+              Name
+              <input type="text" name="name" placeholder="Your name" />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@example.com" required />
+            </label>
+          </div>
+
+          <label>
+            Phone number
+            <input type="tel" name="phone" placeholder="+1 (555) 123-4567" />
+          </label>
+
+          <label>
+            Preferred notification
+            <select name="preferred_channel">
+              <option value="email">Email only</option>
+              <option value="sms">SMS only</option>
+              <option value="both">Email + SMS</option>
+            </select>
+          </label>
+
+          <label>
+            Product interest
+            <input type="text" name="product_interest" placeholder="Example: Scarlet & Violet, Pokemon Center, booster boxes" />
+          </label>
+
+          <button type="submit">Get alerts</button>
+        </form>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-inner">
+        <h3>What you’ll get</h3>
+        <ul class="list">
+          <li>Early release alerts before product goes live</li>
+          <li>Restock notifications when supply appears</li>
+          <li>Priority updates for hot Pokémon box drops</li>
+          <li>Simple email/SMS action for card collectors</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
