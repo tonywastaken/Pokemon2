@@ -5,6 +5,7 @@
 <div class="hero">
   <h1>Subscriber dashboard</h1>
   <p>Review who signed up for release and restock notifications.</p>
+  <p><a href="{{ url_for('admin_export', token=request.args.get('token')) }}">Download CSV</a></p>
 
   {% if subscribers %}
     <table>
@@ -14,13 +15,13 @@
           <th>Email</th>
           <th>Phone</th>
           <th>Channel</th>
-          <th>Alert type</th>
+          <th>Alert</th>
           <th>Set</th>
           <th>MSRP</th>
           <th>Category</th>
           <th>Retailer</th>
           <th>Custom search</th>
-          <th>Joined</th>
+          <th>Updated</th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +37,7 @@
             <td>{{ s.product_category or '—' }}</td>
             <td>{{ s.retailer or '—' }}</td>
             <td>{{ s.custom_search or '—' }}</td>
-            <td>{{ s.created_at }}</td>
+            <td>{{ s.updated_at or s.created_at }}</td>
           </tr>
         {% endfor %}
       </tbody>

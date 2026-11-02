@@ -7,6 +7,21 @@
   <h1>Get notified before the Pokémon card drop hits.</h1>
   <p>Track launches, restocks, and high-demand card releases. Join the list and get updates by email or SMS.</p>
 
+  <div class="features">
+    <div class="feature">
+      <h3>Set-based alerts</h3>
+      <p>Only track the products you actually want, like one set, one box, or one product family.</p>
+    </div>
+    <div class="feature">
+      <h3>Price target alerts</h3>
+      <p>Set your max MSRP or card price, and get notified when it drops into your range.</p>
+    </div>
+    <div class="feature">
+      <h3>Custom criteria</h3>
+      <p>Watch a retailer, category, or keyword and ignore everything else.</p>
+    </div>
+  </div>
+
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       {% for message in messages %}
@@ -15,7 +30,7 @@
     {% endif %}
   {% endwith %}
 
-  <div class="layout">
+  <div class="layout" style="margin-top: 28px;">
     <section class="panel">
       <div class="panel-inner">
         <h2>Join the alert list</h2>
