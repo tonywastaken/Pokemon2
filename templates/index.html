@@ -1,288 +1,202 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Pokemon Card Alerts{% endblock %}</title>
-    <style>
-      :root {
-        --bg: #0f172a;
-        --panel: #111827;
-        --panel-2: #1f2937;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --accent: #f59e0b;
-        --accent-2: #f97316;
-        --success: #34d399;
-        --danger: #f87171;
-        --warning: #fbbf24;
-        --border: rgba(148, 163, 184, 0.35);
-      }
+{% extends 'base.html' %}
+{% block title %}Pokemon Card Watch{% endblock %}
 
-      * { box-sizing: border-box; }
+{% block content %}
+<div class="hero">
+  <span class="badge">Stock + release watcher</span>
+  <h1>Watch Pokémon cards before and right when they drop.</h1>
+  <p>Simple tracking for online product pages and in-store pickup checks. Add a product, run a check, and see if it is live or getting close.</p>
 
-      body {
-        margin: 0;
-        background: linear-gradient(180deg, #020817 0%, #0f172a 100%);
-        color: var(--text);
-        font-family: Arial, Helvetica, sans-serif;
-      }
-
-      .page {
-        width: min(1100px, calc(100% - 32px));
-        margin: 0 auto;
-        padding-bottom: 48px;
-      }
-
-      .hero { padding: 52px 0 30px; }
-
-      .badge {
-        display: inline-block;
-        background: rgba(245, 158, 11, 0.12);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        border-radius: 999px;
-        padding: 8px 14px;
-        font-size: 0.8rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        font-size: clamp(2.2rem, 6vw, 4rem);
-        margin: 18px 0 16px;
-        line-height: 1.1;
-      }
-
-      h2, h3 {
-        margin-top: 0;
-      }
-
-      p { color: var(--muted); line-height: 1.6; }
-
-      .layout {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 28px;
-      }
-
-      .panel {
-        background: rgba(17, 24, 39, 0.82);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.4);
-      }
-
-      .panel-inner { padding: 24px; }
-
-      form { display: grid; gap: 16px; }
-
-      .grid-two {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-      }
-
-      label {
-        display: grid;
-        gap: 8px;
-        color: var(--text);
-        font-weight: 600;
-      }
-
-      input, select, button {
-        font: inherit;
-      }
-
-      input, select {
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--text);
-        padding: 12px 14px;
-      }
-
-      button {
-        cursor: pointer;
-        border: none;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        color: #111827;
-        font-weight: 800;
-        padding: 12px 18px;
-        transition: transform 0.15s ease;
-      }
-
-      button:hover { transform: translateY(-1px); }
-
-      .list {
-        margin: 0;
-        padding-left: 18px;
-        color: var(--muted);
-        line-height: 1.8;
-      }
-
-      .features {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        margin-top: 18px;
-      }
-
-      .feature {
-        background: rgba(15, 23, 42, 0.65);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 18px;
-      }
-
-      .feature h3 {
-        margin-bottom: 8px;
-      }
-
-      .flash {
-        background: rgba(52, 211, 153, 0.14);
-        color: #d1fae5;
-        border: 1px solid rgba(52, 211, 153, 0.35);
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 16px;
-      }
-
-      .watch-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 18px;
-        margin-top: 18px;
-      }
-
-      .product-card {
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 18px;
-        display: grid;
-        gap: 12px;
-      }
-
-      .card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        padding: 6px 10px;
-        font-size: 0.7rem;
-        line-height: 1;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        font-weight: 700;
-        border: 1px solid transparent;
-        white-space: nowrap;
-      }
-
-      .status-live {
-        background: rgba(52, 211, 153, 0.16);
-        color: #a7f3d0;
-        border-color: rgba(52, 211, 153, 0.32);
-      }
-
-      .status-release {
-        background: rgba(251, 191, 36, 0.14);
-        color: #fcd34d;
-        border-color: rgba(251, 191, 36, 0.25);
-      }
-
-      .status-unknown {
-        background: rgba(148, 163, 184, 0.12);
-        color: #cbd5e1;
-        border-color: rgba(148, 163, 184, 0.25);
-      }
-
-      .status-out {
-        background: rgba(248, 113, 113, 0.14);
-        color: #fca5a5;
-        border-color: rgba(248, 113, 113, 0.25);
-      }
-
-      .stock-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.8rem;
-        color: var(--muted);
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        display: inline-block;
-        background: var(--warning);
-      }
-
-      .dot.live { background: var(--success); }
-      .dot.out { background: var(--danger); }
-      .dot.warn { background: var(--warning); }
-
-      .meta-box {
-        display: grid;
-        gap: 8px;
-        color: var(--muted);
-        font-size: 0.92rem;
-      }
-
-      .meta-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-        padding-bottom: 6px;
-      }
-
-      .meta-row strong {
-        color: var(--text);
-        font-weight: 700;
-      }
-
-      .product-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-top: 6px;
-      }
-
-      .small-note {
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .form-row-check {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .form-row-check input {
-        width: auto;
-      }
-
-      @media (max-width: 840px) {
-        .layout, .grid-two, .features { grid-template-columns: 1fr; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page">
-      {% block content %}{% endblock %}
+  <div class="features">
+    <div class="feature">
+      <h3>Live stock</h3>
+      <p>See when a product is in stock or about to go live.</p>
     </div>
-  </body>
-</html>
+    <div class="feature">
+      <h3>Release watch</h3>
+      <p>Track the product window right before a drop.</p>
+    </div>
+    <div class="feature">
+      <h3>Bot controls</h3>
+      <p>Customize a safe trigger with max price and approval rules.</p>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="layout" style="margin-top:28px;">
+    <section class="panel">
+      <div class="panel-inner">
+        <h2>Add a product to monitor</h2>
+        <form action="{{ url_for('add_watch') }}" method="post">
+          <div class="grid-two">
+            <label>
+              Product name
+              <input type="text" name="product_name" placeholder="Scarlet & Violet 151 Booster Box" required>
+            </label>
+            <label>
+              Retailer
+              <input type="text" name="retailer" placeholder="Target, Pokemon Center, local shop">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Product URL
+              <input type="url" name="product_url" placeholder="https://...">
+            </label>
+            <label>
+              Store location
+              <input type="text" name="store_location" placeholder="City / store name / pickup location">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Target price
+              <input type="text" name="target_price" placeholder="$50 max MSRP">
+            </label>
+            <label>
+              Expected release
+              <input type="text" name="expected_release" placeholder="2026-11-10T18:00:00Z">
+            </label>
+          </div>
+
+          <div class="grid-two">
+            <label>
+              Alert type
+              <select name="alert_type">
+                <option value="all">All</option>
+                <option value="release">Release</option>
+                <option value="restock">Restock</option>
+                <option value="set">Set</option>
+                <option value="msrp">MSRP</option>
+              </select>
+            </label>
+            <label>
+              Product type
+              <input type="text" name="product_type" placeholder="Booster box, singles, sealed, binder">
+            </label>
+          </div>
+
+          <label>
+            Notes
+            <input type="text" name="notes" placeholder="Watch this before release, then again right when it drops">
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="auto_buy" value="on">
+            <span>Enable guarded auto-buy trigger (safe demo mode only)</span>
+          </label>
+
+          <button type="submit">Add to watch list</button>
+        </form>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-inner">
+        <h3>Buy bot settings</h3>
+        <form action="{{ url_for('update_bot_settings') }}" method="post">
+          <label>
+            Retailer
+            <input type="text" name="retailer" value="{{ bot_settings.retailer }}">
+          </label>
+
+          <label>
+            Product type
+            <input type="text" name="product_type" value="{{ bot_settings.product_type }}">
+          </label>
+
+          <label>
+            Max price
+            <input type="text" name="max_price" value="{{ bot_settings.max_price }}">
+          </label>
+
+          <label>
+            Quantity limit
+            <input type="number" name="max_quantity" min="1" max="10" value="{{ bot_settings.max_quantity }}">
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="auto_buy" {% if bot_settings.auto_buy %}checked{% endif %}>
+            <span>Auto-buy enabled</span>
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="require_manual_approval" {% if bot_settings.require_manual_approval %}checked{% endif %}>
+            <span>Require manual approval before trigger</span>
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="notify_on_release" {% if bot_settings.notify_on_release %}checked{% endif %}>
+            <span>Notify on release window</span>
+          </label>
+
+          <label class="form-row-check">
+            <input type="checkbox" name="notify_on_restock" {% if bot_settings.notify_on_restock %}checked{% endif %}>
+            <span>Notify on restock</span>
+          </label>
+
+          <button type="submit">Save bot settings</button>
+        </form>
+
+        <form action="{{ url_for('trigger_buy') }}" method="post" style="margin-top: 16px;">
+          <button type="submit">Trigger buy check</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  {% if items %}
+    <div class="panel" style="margin-top:28px;">
+      <div class="panel-inner">
+        <h2>Watch list</h2>
+
+        <div class="watch-grid">
+          {% for item in items %}
+            {% set status = (item.status or 'unknown') | lower %}
+            {% set status_class = 'status-live' if status in ['in_stock', 'page_loaded'] else 'status-release' if status in ['release_window', 'preorder'] else 'status-out' if status in ['out_of_stock'] else 'status-unknown' %}
+            {% set dot_class = 'live' if status in ['in_stock', 'page_loaded'] else 'warn' if status in ['release_window', 'preorder'] else 'out' if status in ['out_of_stock'] else '' %}
+
+            <article class="product-card">
+              <div class="card-header">
+                <h3>{{ item.product_name }}</h3>
+                <span class="status-pill {{ status_class }}">{{ item.status or 'unknown' }}</span>
+              </div>
+
+              <div class="stock-indicator">
+                <span class="dot {{ dot_class }}"></span>
+                <span>{{ 'Live stock' if status in ['in_stock', 'page_loaded'] else 'Watching' if status in ['release_window', 'preorder'] else 'Offline / waiting' if status == 'offline' else 'Not live yet' }}</span>
+              </div>
+
+              <div class="meta-box">
+                <div class="meta-row"><span>Retailer</span><strong>{{ item.retailer or '—' }}</strong></div>
+                <div class="meta-row"><span>Store</span><strong>{{ item.store_location or '—' }}</strong></div>
+                <div class="meta-row"><span>Release</span><strong>{{ item.expected_release or '—' }}</strong></div>
+                <div class="meta-row"><span>Auto-buy</span><strong>{{ 'On' if item.auto_buy else 'Off' }}</strong></div>
+              </div>
+
+              <div class="small-note">{{ item.notes or 'No notes added yet.' }}</div>
+
+              <div class="product-actions">
+                <span class="small-note">{{ item.product_type or 'General watch' }}</span>
+                <form action="{{ url_for('run_watch') }}" method="post">
+                  <input type="hidden" name="watch_id" value="{{ item.id }}">
+                  <button type="submit">Check now</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

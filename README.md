@@ -1,18 +1,18 @@
 # Pokemon2
 
-This repo is a simple Pokémon card monitoring and buying-helper site.
+This repo is a simple Pokémon card stock and release watcher website with a customizable buy-bot trigger.
 
 GitHub repo: https://github.com/tonywastaken/Pokemon2
 
 ## Features
 
-- simple storefront / product watch page
-- product entry for online and in-store tracking
-- release-window monitoring for upcoming drops
-- stock status detection for online listings
-- safe auto-buy toggle that is intentionally blocked unless the retailer has an approved checkout flow
-- subscriber signup for alerts
-- admin dashboard + CSV export
+- simple website dashboard for card watch items
+- product cards with stock/release status tags
+- online product watch and local store watch support
+- quick "Check now" action for each product
+- configurable buy-bot settings with max price, retailer, product type, and quantity
+- manual approval toggle so the trigger stays safe and controlled
+- admin page and subscriber export
 
 ## Run locally
 
@@ -28,16 +28,20 @@ Then open:
 - http://localhost:5000
 - http://localhost:5000/admin
 
-## What this is designed to do
+## Buy-bot safety
 
-This is intentionally simple and practical:
+The buy-bot is intentionally customizable and guarded.
 
-- watch a product before a release happens
-- check for stock when it goes live
-- watch for in-store availability for local shop pickups
-- flag likely restocks and early release windows
-- enable a guarded auto-buy trigger only when the retailer allows it
+It is designed to be:
 
-## Important note
+- editable by product type and retailer
+- capped by max price and quantity
+- able to require manual approval before firing
+- safe by default so it does not blindly buy without rules
 
-The auto-buy function is not a real checkout bot by default. It only simulates a trigger and is meant to be replaced with retailer-approved automation logic.
+This keeps it practical and usable without making it a hidden or reckless checkout bot.
+
+## Notes
+
+- The stock checker uses page-content detection for product availability and release windows.
+- A real retailer API or approved checkout flow should be plugged in if you want live purchasing automation.
