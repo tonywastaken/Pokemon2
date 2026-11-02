@@ -1,0 +1,20 @@
+{
+  "products": [
+    {
+      "name": "Scarlet & Violet 151 Booster Box",
+      "url": "https://www.example-retailer.com/products/scarlet-violet-151-booster-box",
+      "retailer": "Example Retailer",
+      "expected_release": "2026-11-10T18:00:00Z",
+      "release_buffer_minutes": 30,
+      "auto_buy": false
+    },
+    {
+      "name": "Pokemon Center Pop Series 3 Box",
+      "url": "https://www.example-retailer.com/products/pop-series-3-box",
+      "retailer": "Example Retailer",
+      "expected_release": "2026-11-15T12:00:00Z",
+      "release_buffer_minutes": 45,
+      "auto_buy": false
+    }
+  ]
+}
