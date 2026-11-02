@@ -1,116 +1,158 @@
-from __future__ import annotations
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Pokemon Card Alerts{% endblock %}</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #f59e0b;
+        --accent-2: #f97316;
+        --border: rgba(148, 163, 184, 0.35);
+      }
 
-import os
-import sqlite3
-from pathlib import Path
+      * { box-sizing: border-box; }
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #020817 0%, #0f172a 100%);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
+      .page {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+      }
 
-DB_PATH = Path(__file__).with_name("subscribers.db")
+      .hero { padding: 72px 0 48px; }
 
+      .badge {
+        display: inline-block;
+        background: rgba(245, 158, 11, 0.12);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
 
-def get_db_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+      h1 {
+        font-size: clamp(2.2rem, 6vw, 4rem);
+        margin: 18px 0 16px;
+        line-height: 1.1;
+      }
 
+      p { color: var(--muted); line-height: 1.6; }
 
-def init_db() -> None:
-    with get_db_connection() as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS subscribers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                email TEXT NOT NULL UNIQUE,
-                phone TEXT,
-                preferred_channel TEXT NOT NULL DEFAULT 'email',
-                product_interest TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """
-        )
-        conn.commit()
+      .layout {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 28px;
+      }
 
+      .panel {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.4);
+      }
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+      .panel-inner { padding: 24px; }
 
+      form { display: grid; gap: 16px; }
 
-@app.post("/subscribe")
-def subscribe():
-    name = (request.form.get("name") or "").strip()
-    email = (request.form.get("email") or "").strip().lower()
-    phone = (request.form.get("phone") or "").strip()
-    preferred_channel = (request.form.get("preferred_channel") or "email").strip().lower()
-    product_interest = (request.form.get("product_interest") or "").strip()
+      .grid-two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
 
-    if not email or "@" not in email:
-        flash("Please enter a valid email address.")
-        return redirect(url_for("index"))
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--text);
+        font-weight: 600;
+      }
 
-    if preferred_channel not in {"email", "sms", "both"}:
-        preferred_channel = "email"
+      input, select, button { font: inherit; }
 
-    if phone:
-        phone = phone.replace(" ", "")
+      input, select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text);
+        padding: 12px 14px;
+      }
 
-    try:
-        with get_db_connection() as conn:
-            conn.execute(
-                """
-                INSERT INTO subscribers (name, email, phone, preferred_channel, product_interest)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(email) DO UPDATE SET
-                    name = excluded.name,
-                    phone = excluded.phone,
-                    preferred_channel = excluded.preferred_channel,
-                    product_interest = excluded.product_interest
-                """,
-                (name, email, phone, preferred_channel, product_interest),
-            )
-            conn.commit()
-    except sqlite3.Error:
-        flash("There was a problem saving your signup. Please try again.")
-        return redirect(url_for("index"))
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        color: #111827;
+        font-weight: 800;
+        padding: 14px 18px;
+      }
 
-    return redirect(url_for("thank_you"))
+      .list {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
 
+      .thanks {
+        min-height: 60vh;
+        display: grid;
+        place-items: center;
+      }
 
-@app.route("/thank-you")
-def thank_you():
-    return render_template("thank_you.html")
+      .success-box {
+        max-width: 640px;
+        padding: 40px 28px;
+        text-align: center;
+      }
 
+      .flash {
+        background: rgba(52, 211, 153, 0.14);
+        color: #d1fae5;
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+      }
 
-@app.route("/admin")
-def admin():
-    admin_token = os.environ.get("ADMIN_TOKEN")
-    provided_token = request.args.get("token")
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
 
-    if admin_token and provided_token != admin_token:
-        return "Unauthorized", 401
+      th, td {
+        text-align: left;
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
 
-    with get_db_connection() as conn:
-        subscribers = conn.execute(
-            """
-            SELECT id, name, email, phone, preferred_channel, product_interest, created_at
-            FROM subscribers
-            ORDER BY created_at DESC
-            """
-        ).fetchall()
+      th { color: #f8fafc; }
 
-    return render_template("admin.html", subscribers=subscribers)
-
-
-@app.get("/health")
-def health():
-    return {"ok": True}
-
-
-if __name__ == "__main__":
-    init_db()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+      @media (max-width: 840px) {
+        .layout, .grid-two { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>

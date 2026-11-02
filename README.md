@@ -1,16 +1,20 @@
 # Pokemon2
 
-This repo now includes two parts:
+This repo includes a Pokémon card stock checker and a small Flask signup site for people to join release/restock alerts.
 
-1. A Python stock-checker for Pokémon card retailers
-2. A simple web app where people can sign up for release and restock alerts by email and phone
+GitHub repo: https://github.com/tonywastaken/Pokemon2
 
-## Run the web app
+## Local setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+```
+
+## Run the alert website
+
+```bash
 python app.py
 ```
 
@@ -24,21 +28,18 @@ Then open:
 python main.py --demo
 ```
 
-## Configure the web signup
+## Notes
 
-The app stores signups in a local SQLite database named `subscribers.db`. It accepts:
+- The website saves signups in a local SQLite database: `subscribers.db`
+- The alert form accepts email, phone number, preferred channel, and item interest
+- The stock checker polls product pages and looks for stock/restock signals and release windows
+- Auto-buy logic is intentionally disabled by default and should only be enabled when retailer-approved
 
-- email address
-- phone number
-- preferred notification method (`email`, `sms`, or `both`)
-- product interest
+## Example alert flow
 
-This is a good MVP for collecting signup intent before wiring in a real notification provider.
+The MVP is built for:
 
-## Optional production upgrades
-
-- email delivery via SendGrid / Postmark / SMTP
-- SMS delivery via Twilio
-- admin dashboard for viewing signups
-- product watchlist synced with subscriber interest
-- scheduled alerts when stock changes or a release window opens
+- collecting emails and phone numbers
+- storing subscriber interest
+- preparing for real restock/release alerts via email and SMS providers
+- combining a stock monitor with a waiting list

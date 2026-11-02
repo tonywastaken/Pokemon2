@@ -1,181 +1,71 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Pokemon Card Alerts{% endblock %}</title>
-    <style>
-      :root {
-        --bg: #0f172a;
-        --panel: #111827;
-        --panel-2: #1f2937;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --accent: #f59e0b;
-        --accent-2: #f97316;
-        --success: #34d399;
-        --border: rgba(148, 163, 184, 0.35);
-      }
+{% extends 'base.html' %}
+{% block title %}Pokemon Card Alerts{% endblock %}
 
-      * { box-sizing: border-box; }
+{% block content %}
+<div class="hero">
+  <span class="badge">Release & restock alerts</span>
+  <h1>Get notified before the Pokémon card drop hits.</h1>
+  <p>Track launches, restocks, and high-demand card releases. Join the list and get updates by email or SMS.</p>
 
-      body {
-        margin: 0;
-        background: linear-gradient(180deg, #020817 0%, #0f172a 100%);
-        color: var(--text);
-        font-family: Arial, Helvetica, sans-serif;
-      }
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-      .page {
-        width: min(1100px, calc(100% - 32px));
-        margin: 0 auto;
-      }
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-inner">
+        <h2>Join the alert list</h2>
+        <form action="{{ url_for('subscribe') }}" method="post">
+          <div class="grid-two">
+            <label>
+              Name
+              <input type="text" name="name" placeholder="Your name" />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@example.com" required />
+            </label>
+          </div>
 
-      .hero {
-        padding: 72px 0 48px;
-      }
+          <label>
+            Phone number
+            <input type="tel" name="phone" placeholder="+1 (555) 123-4567" />
+          </label>
 
-      .badge {
-        display: inline-block;
-        background: rgba(245, 158, 11, 0.12);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        border-radius: 999px;
-        padding: 8px 14px;
-        font-size: 0.8rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
+          <label>
+            Preferred notification
+            <select name="preferred_channel">
+              <option value="email">Email only</option>
+              <option value="sms">SMS only</option>
+              <option value="both">Email + SMS</option>
+            </select>
+          </label>
 
-      h1 {
-        font-size: clamp(2.2rem, 6vw, 4rem);
-        margin: 18px 0 16px;
-        line-height: 1.1;
-      }
+          <label>
+            Product interest
+            <input type="text" name="product_interest" placeholder="Example: Scarlet & Violet, Pokémon Center, booster boxes" />
+          </label>
 
-      p {
-        color: var(--muted);
-        line-height: 1.6;
-      }
+          <button type="submit">Get alerts</button>
+        </form>
+      </div>
+    </section>
 
-      .layout {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 28px;
-      }
-
-      .panel {
-        background: rgba(17, 24, 39, 0.8);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.4);
-      }
-
-      .panel-inner {
-        padding: 24px;
-      }
-
-      form {
-        display: grid;
-        gap: 16px;
-      }
-
-      .grid-two {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-      }
-
-      label {
-        display: grid;
-        gap: 8px;
-        color: var(--text);
-        font-weight: 600;
-      }
-
-      input, select, button {
-        font: inherit;
-      }
-
-      input, select {
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--text);
-        padding: 12px 14px;
-      }
-
-      button {
-        cursor: pointer;
-        border: none;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        color: #111827;
-        font-weight: 800;
-        padding: 14px 18px;
-        transition: transform 0.15s ease;
-      }
-
-      button:hover {
-        transform: translateY(-1px);
-      }
-
-      .list {
-        margin: 0;
-        padding-left: 18px;
-        color: var(--muted);
-        line-height: 1.8;
-      }
-
-      .thanks {
-        min-height: 60vh;
-        display: grid;
-        place-items: center;
-      }
-
-      .success-box {
-        max-width: 640px;
-        padding: 40px 28px;
-        text-align: center;
-      }
-
-      .flash {
-        background: rgba(52, 211, 153, 0.14);
-        color: #d1fae5;
-        border: 1px solid rgba(52, 211, 153, 0.35);
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 16px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 16px;
-      }
-
-      th, td {
-        text-align: left;
-        padding: 12px 10px;
-        border-bottom: 1px solid var(--border);
-        vertical-align: top;
-      }
-
-      th {
-        color: #f8fafc;
-      }
-
-      @media (max-width: 840px) {
-        .layout, .grid-two {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page">
-      {% block content %}{% endblock %}
-    </div>
-  </body>
-</html>
+    <aside class="panel">
+      <div class="panel-inner">
+        <h3>What you’ll get</h3>
+        <ul class="list">
+          <li>Early release alerts before product goes live</li>
+          <li>Restock notifications when supply appears</li>
+          <li>Priority updates for hot Pokémon box drops</li>
+          <li>Simple email/SMS action for card collectors</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
